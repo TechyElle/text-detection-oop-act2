@@ -46,5 +46,28 @@ for line_index, line in enumerate(word_data.splitlines()):
                         (word_x, word_y - 5),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (50, 50, 255), 2)
 
-cv2.imshow('word_detection_result', input_image)
+# Detecting Only Digits
+image_height, image_width, _ = input_image.shape
+digit_config = r'--oem 3 --psm 6 outputbase digits'
+digit_boxes  = pytesseract.image_to_boxes(input_image, config=digit_config)
+
+for digit_box in digit_boxes.splitlines():
+    box_data     = digit_box.split(' ')
+    digit_x      = int(box_data[1])
+    digit_y      = int(box_data[2])
+    digit_width  = int(box_data[3])
+    digit_height = int(box_data[4])
+    digit_label  = box_data[0]
+
+    # Tesseract uses bottom-left origin, so y must be flipped using image_height
+    cv2.rectangle(input_image,
+                  (digit_x, image_height - digit_y),
+                  (digit_width, image_height - digit_height),
+                  (50, 50, 255), 2)
+
+    cv2.putText(input_image, digit_label,
+                (digit_x, image_height - digit_y + 25),
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (50, 50, 255), 2)
+
+cv2.imshow('digit_detection_result', input_image)
 cv2.waitKey(0)
